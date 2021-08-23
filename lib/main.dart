@@ -5,8 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-var request = Uri.parse('https://api.hgbrasil.com/finance?format=json&key=f6b73b8f');
-
+var request =
+    Uri.parse('https://api.hgbrasil.com/finance?format=json&key=f6b73b8f');
 
 void main() async {
   runApp(MaterialApp(
@@ -16,11 +16,12 @@ void main() async {
         primaryColor: Colors.amber,
         inputDecorationTheme: InputDecorationTheme(
           enabledBorder:
-          OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
-          focusedBorder:OutlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+              OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+          focusedBorder:
+              OutlineInputBorder(borderSide: BorderSide(color: Colors.white)),
           hintStyle: TextStyle(color: Colors.amber),
         )),
-    ));
+  ));
 }
 
 class Home extends StatefulWidget {
@@ -31,19 +32,49 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final realControler = TextEditingController();
-  final dolarControler = TextEditingController();
-  final euroControler = TextEditingController();
+  final realController = TextEditingController();
+  final dolarController = TextEditingController();
+  final euroController = TextEditingController();
 
-  void _realChange(String text){
-    print(text);
+  double dolar = 0.0;
+  double euro = 0.0;
+
+  void _clearAll() {
+    realController.text = "";
+    dolarController.text = "";
+    euroController.text = "";
   }
-  void _dolarChange(String text){
-    print(text);
+
+  void _realChanged(String text) {
+    if (text.isEmpty) {
+      _clearAll();
+      return;
+    }
+    double real = double.parse(text);
+    dolarController.text = (real / dolar).toStringAsFixed(2);
+    euroController.text = (real / euro).toStringAsFixed(2);
   }
-  void _euroChange(String text){
-    print(text);
+
+  void _dolarChanged(String text) {
+    if (text.isEmpty) {
+      _clearAll();
+      return;
+    }
+    double dolar = double.parse(text);
+    realController.text = (dolar * this.dolar).toStringAsFixed(2);
+    euroController.text = (dolar * this.dolar / euro).toStringAsFixed(2);
   }
+
+  void _euroChanged(String text) {
+    if (text.isEmpty) {
+      _clearAll();
+      return;
+    }
+    double euro = double.parse(text);
+    realController.text = (euro * this.euro).toStringAsFixed(2);
+    dolarController.text = (euro * this.euro / dolar).toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,17 +108,26 @@ class _HomeState extends State<Home> {
                   textAlign: TextAlign.center,
                 ));
               } else {
+                dolar = snapshot.data!["results"]["currencies"]["USD"]["buy"];
+                euro = snapshot.data!["results"]["currencies"]["EUR"]["buy"];
                 return SingleChildScrollView(
                   padding: EdgeInsets.all(10.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Icon(Icons.monetization_on,color: Colors.amber,size: 150.0,),
-                      buildTextField("Reais", "R\$",realControler,_realChange),
+                      Icon(
+                        Icons.monetization_on,
+                        color: Colors.amber,
+                        size: 150.0,
+                      ),
+                      buildTextField(
+                          "Reais", "R\$", realController, _realChanged),
                       Divider(),
-                      buildTextField("Dólares", "US\$",dolarControler,_dolarChange),
+                      buildTextField(
+                          "Dólares", "US\$", dolarController, _dolarChanged),
                       Divider(),
-                      buildTextField("Euros", "€",euroControler,_euroChange),
+                      buildTextField(
+                          "Euros", "€", euroController, _euroChanged),
                       Divider(),
                     ],
                   ),
@@ -105,17 +145,20 @@ Future<Map> getData() async {
   return jsonDecode(response.body);
 }
 
-Widget buildTextField(String label,String prefix,TextEditingController controller,Function(String) f){
+Widget buildTextField(String label, String prefix,
+    TextEditingController controller, Function(String) f) {
   return TextField(
     decoration: InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color:Colors.amber,),
+      labelStyle: TextStyle(
+        color: Colors.amber,
+      ),
       border: OutlineInputBorder(),
       prefixText: prefix,
     ),
-    style: TextStyle(color: Colors.amber,fontSize: 25.0),
+    style: TextStyle(color: Colors.amber, fontSize: 25.0),
     controller: controller,
     onChanged: f,
-    keyboardType: TextInputType.number,
+    keyboardType: TextInputType.numberWithOptions(decimal: true),
   );
 }
