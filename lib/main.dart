@@ -5,8 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-var request =
-    Uri.parse('https://api.hgbrasil.com/finance?format=json&key=f6b73b8f');
+var request = Uri.parse('https://api.hgbrasil.com/finance?format=json&key=f6b73b8f');
+
 
 void main() async {
   runApp(MaterialApp(
@@ -31,6 +31,19 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final realControler = TextEditingController();
+  final dolarControler = TextEditingController();
+  final euroControler = TextEditingController();
+
+  void _realChange(String text){
+    print(text);
+  }
+  void _dolarChange(String text){
+    print(text);
+  }
+  void _euroChange(String text){
+    print(text);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,38 +83,11 @@ class _HomeState extends State<Home> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Icon(Icons.monetization_on,color: Colors.amber,size: 150.0,),
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: "Reais",
-                          labelStyle: TextStyle(color:Colors.amber,),
-                          border: OutlineInputBorder(),
-                          prefixText: "R\$",
-                        ),
-                        style: TextStyle(color: Colors.amber,fontSize: 25.0),
-
-                      ),
+                      buildTextField("Reais", "R\$",realControler,_realChange),
                       Divider(),
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: "Dólares",
-                          labelStyle: TextStyle(color:Colors.amber,),
-                          border: OutlineInputBorder(),
-                          prefixText: "U\$",
-                        ),
-                        style: TextStyle(color: Colors.amber,fontSize: 25.0),
-
-                      ),
+                      buildTextField("Dólares", "US\$",dolarControler,_dolarChange),
                       Divider(),
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: "Euros",
-                          labelStyle: TextStyle(color:Colors.amber,),
-                          border: OutlineInputBorder(),
-                          prefixText: "\€",
-                        ),
-                        style: TextStyle(color: Colors.amber,fontSize: 25.0),
-
-                      ),
+                      buildTextField("Euros", "€",euroControler,_euroChange),
                       Divider(),
                     ],
                   ),
@@ -117,4 +103,19 @@ class _HomeState extends State<Home> {
 Future<Map> getData() async {
   http.Response response = await http.get(request);
   return jsonDecode(response.body);
+}
+
+Widget buildTextField(String label,String prefix,TextEditingController controller,Function(String) f){
+  return TextField(
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color:Colors.amber,),
+      border: OutlineInputBorder(),
+      prefixText: prefix,
+    ),
+    style: TextStyle(color: Colors.amber,fontSize: 25.0),
+    controller: controller,
+    onChanged: f,
+    keyboardType: TextInputType.number,
+  );
 }
